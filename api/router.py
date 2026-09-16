@@ -39,9 +39,8 @@ async def create_transcription(
     background_tasks: BackgroundTasks,
     file: AudioUpload,
 ):
-
-    log_main("-------------- Starting Task --------------")
     """Accept audio, store it, enqueue transcription, return a job_id at once."""
+    log_main("-------------- Starting Task --------------")
     log_main("Received transcription request")
     jobs = get_jobs(request)
     blobs = get_blobs(request)
@@ -51,7 +50,7 @@ async def create_transcription(
     try:
         audio = MediaBytes(raw)
     except (MediaBytes.NoAudio, RuntimeError) as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)) from e
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)) from e
 
     job_id = str(uuid.uuid4())
     log_main(f"JobUUID: {job_id}  ")
@@ -92,7 +91,7 @@ async def get_transcript(job_id: str, request: Request):
 
     if job["status"] == JobStatus.FAILED:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=job.get("error", "Job failed"),
         )
     if job["status"] != JobStatus.DONE:
